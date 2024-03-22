@@ -826,6 +826,21 @@ static int pk_get_rsapubkey(unsigned char **p,
 }
 #endif /* MBEDTLS_RSA_C */
 
+#if defined(MBEDTLS_LMS_C)
+static int pk_get_lmspubkey(unsigned char** p,
+    const unsigned char* end,
+    mbedtls_lms_public_t* lms)
+{
+    int ret;
+
+    if ((ret = mbedtls_lms_import_public_key(lms, *p, end - *p)) != 0)
+        return(MBEDTLS_ERROR_ADD(MBEDTLS_ERR_PK_INVALID_PUBKEY, ret));
+
+    *p += MBEDTLS_LMS_PUBLIC_KEY_LEN(lms->params.type);
+    return 0;
+}
+#endif /* MBEDTLS_LMS_C */
+
 /* Get a PK algorithm identifier
  *
  *  AlgorithmIdentifier  ::=  SEQUENCE  {
@@ -936,6 +951,13 @@ int mbedtls_pk_parse_subpubkey(unsigned char **p, const unsigned char *end,
         }
     } else
 #endif /* MBEDTLS_PK_HAVE_ECC_KEYS */
+#if defined(MBEDTLS_LMS_C)
+        if (pk_alg == MBEDTLS_PK_LMS)
+        {
+            ret = pk_get_lmspubkey(p, end, mbedtls_pk_lms(*pk));
+        }
+        else
+#endif /* MBEDTLS_LMS_C */
     ret = MBEDTLS_ERR_PK_UNKNOWN_PK_ALG;
 
     if (ret == 0 && *p != end) {

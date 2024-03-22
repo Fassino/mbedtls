@@ -28,6 +28,10 @@
 #include "mbedtls/ecdsa.h"
 #endif
 
+#if defined(MBEDTLS_LMS_C)
+#include "mbedtls/lms.h"
+#endif
+
 #if defined(MBEDTLS_USE_PSA_CRYPTO) || defined(MBEDTLS_PSA_CRYPTO_C)
 #include "psa/crypto.h"
 #endif
@@ -79,6 +83,7 @@ typedef enum {
     MBEDTLS_PK_RSA_ALT,
     MBEDTLS_PK_RSASSA_PSS,
     MBEDTLS_PK_OPAQUE,
+    MBEDTLS_PK_LMS,
 } mbedtls_pk_type_t;
 
 /**
@@ -829,6 +834,29 @@ static inline mbedtls_ecp_keypair *mbedtls_pk_ec(const mbedtls_pk_context pk)
     }
 }
 #endif /* MBEDTLS_ECP_C */
+
+#if defined(MBEDTLS_LMS_C)
+/**
+ * Quick access to an RSA context inside a PK context.
+ *
+ * \warning This function can only be used when the type of the context, as
+ * returned by mbedtls_pk_get_type(), is #MBEDTLS_PK_RSA.
+ * Ensuring that is the caller's responsibility.
+ * Alternatively, you can check whether this function returns NULL.
+ *
+ * \return The internal RSA context held by the PK context, or NULL.
+ */
+static inline mbedtls_lms_public_t* mbedtls_pk_lms(const mbedtls_pk_context pk)
+{
+    switch (mbedtls_pk_get_type(&pk))
+    {
+    case MBEDTLS_PK_LMS:
+        return((mbedtls_lms_public_t*)(pk).MBEDTLS_PRIVATE(pk_ctx));
+    default:
+        return(NULL);
+    }
+}
+#endif /* MBEDTLS_LMS_C */
 
 #if defined(MBEDTLS_PK_PARSE_C)
 /** \ingroup pk_module */

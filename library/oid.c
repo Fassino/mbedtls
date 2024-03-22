@@ -464,6 +464,12 @@ static const oid_sig_alg_t oid_sig_alg[] =
         MBEDTLS_MD_NONE,     MBEDTLS_PK_RSASSA_PSS,
     },
 #endif /* MBEDTLS_RSA_C */
+#if defined(MBEDTLS_LMS_C)
+    {
+        OID_DESCRIPTOR("\x2A\x86\x48\x86\xF7\x0D\x01\x09\x10\x03\x11", "id-alg-hss-lms-hashsig",           "LMS"),
+        MBEDTLS_MD_SHA256,     MBEDTLS_PK_LMS,
+    },
+#endif /* MBEDTLS_LMS_C */
     {
         NULL_OID_DESCRIPTOR,
         MBEDTLS_MD_NONE, MBEDTLS_PK_NONE,
@@ -516,6 +522,10 @@ static const oid_pk_alg_t oid_pk_alg[] =
     {
         OID_DESCRIPTOR(MBEDTLS_OID_EC_ALG_ECDH,         "id-ecDH",          "EC key for ECDH"),
         MBEDTLS_PK_ECKEY_DH,
+    },
+    {
+        OID_DESCRIPTOR("\x2A\x86\x48\x86\xF7\x0D\x01\x09\x10\x03\x11", "id-alg-hss-lms-hashsig", "LMS"),
+        MBEDTLS_PK_LMS
     },
     {
         NULL_OID_DESCRIPTOR,

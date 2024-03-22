@@ -236,6 +236,13 @@ static int x509_profile_check_key(const mbedtls_x509_crt_profile *profile,
     }
 #endif /* MBEDTLS_PK_HAVE_ECC_KEYS */
 
+#if defined(MBEDTLS_LMS_C)
+    if (pk_alg == MBEDTLS_PK_LMS)
+    {
+        return(0);
+    }
+#endif /* MBEDTLS_LMS_C */
+
     return -1;
 }
 

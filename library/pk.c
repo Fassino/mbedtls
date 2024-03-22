@@ -123,6 +123,10 @@ const mbedtls_pk_info_t *mbedtls_pk_info_from_type(mbedtls_pk_type_t pk_type)
         case MBEDTLS_PK_ECDSA:
             return &mbedtls_ecdsa_info;
 #endif /* MBEDTLS_PK_CAN_ECDSA_SOME */
+#if defined(MBEDTLS_LMS_C)
+        case MBEDTLS_PK_LMS:
+            return(&mbedtls_lms_info);
+#endif
         /* MBEDTLS_PK_RSA_ALT omitted on purpose */
         default:
             return NULL;

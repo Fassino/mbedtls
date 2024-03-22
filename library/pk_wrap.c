@@ -26,6 +26,10 @@
 #include "mbedtls/ecdsa.h"
 #endif
 
+#if defined(MBEDTLS_LMS_C)
+#include "mbedtls/lms.h"
+#endif
+
 #if defined(MBEDTLS_RSA_C) && defined(MBEDTLS_PSA_CRYPTO_C)
 #include "pkwrite.h"
 #endif
@@ -1666,6 +1670,64 @@ const mbedtls_pk_info_t mbedtls_rsa_alt_info = {
     .debug_func = NULL,
 };
 #endif /* MBEDTLS_PK_RSA_ALT_SUPPORT */
+
+#if defined(MBEDTLS_LMS_C)
+
+static int lms_can_do(mbedtls_pk_type_t type)
+{
+    return(type == MBEDTLS_PK_LMS);
+}
+
+static int lms_verify_wrap(mbedtls_pk_context* pk, mbedtls_md_type_t md_alg,
+    const unsigned char* hash, size_t hash_len,
+    const unsigned char* sig, size_t sig_len)
+{
+    mbedtls_lms_public_t* lms = pk->pk_ctx;
+
+    return (mbedtls_lms_verify(lms, hash, hash_len, sig, sig_len));
+}
+
+static void* lms_alloc_wrap(void)
+{
+    void* ctx = mbedtls_calloc(1, sizeof(mbedtls_lms_public_t));
+
+    if (ctx != NULL)
+        mbedtls_lms_public_init((mbedtls_lms_public_t*)ctx);
+
+    return(ctx);
+}
+
+static void lms_free_wrap(void* ctx)
+{
+    mbedtls_lms_public_free((mbedtls_lms_public_t*)ctx);
+    mbedtls_zeroize_and_free(ctx, sizeof(mbedtls_lms_public_t));
+}
+
+const mbedtls_pk_info_t mbedtls_lms_info = {
+    .type = MBEDTLS_PK_LMS,
+    .name = "LMS",
+    .get_bitlen = NULL,
+    .can_do = lms_can_do,
+    .verify_func = lms_verify_wrap,
+    .sign_func = NULL,
+#if defined(MBEDTLS_ECDSA_C) && defined(MBEDTLS_ECP_RESTARTABLE)
+    .verify_rs_func = NULL,
+    .sign_rs_func = NULL,
+    .rs_alloc_func = NULL,
+    .rs_free_func = NULL,
+#endif /* MBEDTLS_ECDSA_C && MBEDTLS_ECP_RESTARTABLE */
+    .decrypt_func = NULL,
+    .encrypt_func = NULL,
+#if defined(MBEDTLS_RSA_C)
+    .check_pair_func = NULL,
+#else
+    .check_pair_func = NULL,
+#endif
+    .ctx_alloc_func = lms_alloc_wrap,
+    .ctx_free_func = lms_free_wrap,
+    .debug_func = NULL
+};
+#endif
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
 static size_t opaque_get_bitlen(mbedtls_pk_context *pk)
